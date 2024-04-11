@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            width: 40%;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-log {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 20px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .user-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-log" id="chat-log">
+        <!-- Chat log will be displayed here -->
+    </div>
+
+    <form id="chat-form">
+        <input type="text" name="user_input" class="user-input" placeholder="Type your message here..." autocomplete="off" required>
+        <button type="submit" class="submit-btn">Send</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("chat-form").onsubmit = function(e) {
+    e.preventDefault();
+    var userInput = document.querySelector(".user-input").value;
+    var chatLog = document.getElementById("chat-log");
+    
+    // Display user's message in chat log
+    var userMessage = document.createElement("div");
+    userMessage.textContent = "You: " + userInput;
+    chatLog.appendChild(userMessage);
+    
+    // Prepare form data for submission
+    var formData = new FormData();
+    formData.append("user_input", userInput);
+
+    // Send data to Flask app and get response
+    fetch("/get_response", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Display bot's response in chat log
+        var botResponse = document.createElement("div");
+        botResponse.textContent = "Bot: " + data.response;
+        chatLog.appendChild(botResponse);
+
+        // Scroll to the bottom of chat log
+        chatLog.scrollTop = chatLog.scrollHeight;
+    })
+    .catch(error => console.error("Error:", error));
+
+    // Clear input field after sending
+    document.querySelector(".user-input").value = "";
+};
+</script>
+
+</body>
+</html>
